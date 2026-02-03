@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redux</title>
+  </head>
+  <body>
+    <h1 id="counter-value">0</h1>
+    <button id="increase">Increase</button>
+    <script src="https://cdn.jsdelivr.net/npm/redux@4.2.1/dist/redux.min.js"></script>
+    <script>
+      // Redux concepts:
+      // - Store: Nơi lưu trữ State
+      // - State: Dữ liệu (thường là Global State)
+      // - Action: Mô tả hành động sẽ được thực hiện
+      // - Dispatch: Bắn đi một action
+      // - Reducer: Nơi nhận state hiện tại + action => Xử lý =>
+      // Trả ra State mới
+
+      // Quy trình: User click (UI) => Event handle =>
+      // Dispatch action => Reducer nhận state hiện tại + action =>
+      //  trả ra state mới => Re-render UI
+
+      //   1. Tạo init state
+      const initState = 0;
+
+      //   2. Tạo reducer
+      function reducer(state, action) {
+        switch (action.type) {
+          case "increase":
+            return state + action.payload;
+          default:
+            return state;
+        }
+      }
+
+      //   3. Tạo store
+      const store = Redux.createStore(reducer, initState);
+      // *createStore sẽ gọi reducer() để lấy initState
+      //   - store.dispatch(action): Bắn đi một action tới reducer
+      //   - store.getState(): Trả về state hiện tại
+      //   - store.subscribe(listener): Đăng ký một callback để biết khi nào có state mới
+
+      const counterValue = document.querySelector("#counter-value");
+      const increase = document.querySelector("#increase");
+
+      //   Render UI với giá trị khởi tạo của state
+      function render() {
+        counterValue.textContent = store.getState();
+      }
+
+      render();
+
+      //   Re-render khi state được cập nhật
+      store.subscribe(render);
+
+      //   const unSubscribe = store.subscribe(render);
+
+      //   Xử lý khi click
+      increase.addEventListener("click", () => {
+        store.dispatch({
+          type: "increase",
+          payload: 10,
+        });
+      });
+    </script>
+  </body>
+</html>

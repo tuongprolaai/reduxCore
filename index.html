@@ -1,23 +1,98 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Redux</title>
-    </head>
-    <body>
-        <h1 id="value">0</h1>
-        <button id="increase">Increase</button>
-        <script src="https://cdn.jsdelivr.net/npm/redux@4.2.1/dist/redux.min.js"></script>
-        <script>
-            // Redux concepts:
-            // - Store: Nơi lưu trữ State
-            // - State: Dữ liệu (thường là Global State)
-            // - Action: Mô tả hành động sẽ được thực hiện
-            // - Dispatch: Bắn đi một action
-            // - Reducer: Nơi nhận state hiện tại + action => Xử lý =>
-            // Trả ra State mới
-            // 41:31 (1)
-        </script>
-    </body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Todo</h1>
+    <form action="" id="form">
+      <input type="text" placeholder="Enter task..." id="task-name" />
+      <button>Add</button>
+    </form>
+    <ul id="list"></ul>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/redux@4.2.1/dist/redux.min.js"></script> -->
+
+    <script>
+      // My Redux
+      const Redux = {
+        __DO_NOT_USE__ActionTypes: { type: "@@F8-redux/INIT.a.b.c" },
+        createStore(reducer, initState) {
+          let state = reducer(initState, this.__DO_NOT_USE__ActionTypes);
+          const listeners = [];
+          return {
+            getState() {
+              return state;
+            },
+            dispatch(action) {
+              state = reducer(state, action);
+              listeners.forEach((listener) => listener());
+            },
+            subscribe(listener) {
+              if (typeof listener === "function") {
+                listeners.push(listener);
+              }
+              return () => {
+                const index = listeners.indexOf(listener);
+                listeners.splice(index, 1);
+              };
+            },
+          };
+        },
+      };
+    </script>
+
+    <script>
+      const initState = [];
+
+      function reducer(state, action) {
+        switch (action.type) {
+          case "add":
+            return [action.payload, ...state];
+          default:
+            return state;
+        }
+      }
+      const store = Redux.createStore(reducer, initState);
+
+      //   DOM elements
+      const taskName = document.querySelector("#task-name");
+      const list = document.querySelector("#list");
+      const form = document.querySelector("#form");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const newTask = {
+          name: taskName.value,
+          completed: false,
+        };
+        store.dispatch({
+          type: "add",
+          payload: newTask,
+        });
+      });
+
+      function renderTasks() {
+        const tasks = store.getState();
+        list.innerHTML = tasks
+          .map(
+            (task) => `
+        <li>${task.name} (${task.completed ? "Done" : "Pending"})</li>
+        `,
+          )
+          .join("");
+      }
+
+      renderTasks();
+
+      const unsubscribe1 = store.subscribe(renderTasks);
+      const unsubscribe2 = store.subscribe(() => {
+        console.log("2: State vua duoc cap nhat!");
+      });
+      const unsubscribe3 = store.subscribe(() => {
+        console.log("3: State vua duoc cap nhat!");
+      });
+    </script>
+  </body>
 </html>
